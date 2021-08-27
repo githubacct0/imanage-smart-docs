@@ -20,18 +20,15 @@
       >
         &lt; Back
       </router-link>
-      <h1 class="mt-2">PDF Form Smart</h1>
-      <h1 class="mb-4">Document Creator</h1>
-      <p class="mb-0">
-        If you are new to Integra and Smart Documents, spend the next few
-        minutes going through the
-      </p>
-      <p class="mb-0">
-        steps of how the Integra Smart Document Center works which will allow
-        you to better understand
-      </p>
-      <p class="mb-0">
-        the technology behind Integra and how it works.
+      <h1 class="mt-2">PIntegra Drag and Drop Starter App</h1>
+      <p class="mt-5">
+        This is a simple node application developed by Integra to help other
+        developers get a head start on processing Smart Documents. The
+        application simply takes a Smart PDF Document and checks the hash of the
+        document against the Integra Ledger Blockchain, if it is valid it will
+        return the metadata contained within the document and return it to the
+        user. The repo can be found at
+        https://github.com/IntegraLedger/DragAndDropStarter.
       </p>
     </v-col>
   </v-sheet>
