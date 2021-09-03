@@ -1,5 +1,7 @@
 import React from 'react'
+import Link from 'next/link'
 import Head from 'next/head'
+import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 
 const Logo = () => (
@@ -26,8 +28,44 @@ const Logo = () => (
   </svg>
 )
 
+const PdfIcon = () => (
+  <Image src="/pdf.svg" alt="PDF icon" width="200px" height="75px"/>
+)
+
 export default function Home() {
-  const [filesSelected, setFilesSelected] = React.useState();
+  const [isDraggingFileOver, setIsDraggingFileOver] = React.useState(false);
+  const [isUploading, setIsUploading] = React.useState(false);
+  const [jsonResponse, setJsonResponse] = React.useState({});
+
+  const onSelectFile = async (files) => {
+    setIsUploading(true)
+    try {
+      // const data = new FormData();
+      // for (const file of files) {
+      //   data.append('files[]', file, file.name)
+      // }
+      // const response = await fetch('https://integraapiproduction.azurewebsites.net/analyze/', {
+      //   method: 'POST',
+      //   body: data,
+      // });
+      // setJsonResponse(await response.json());
+      let i = 1
+      const allJsonResponses = {}
+      for (const file of files) {
+        const data = new FormData();
+        data.append('file', file, file.name)
+        const response = await fetch('https://integraapiproduction.azurewebsites.net/analyze/', {
+          method: 'POST',
+          body: data,
+        });
+        allJsonResponses[i.toString()] = await response.json()
+        i++
+      }
+      setJsonResponse(allJsonResponses)
+    } finally {
+      setIsUploading(false)
+    }
+  }
 
   return (
     <div className={styles.container}>
@@ -39,7 +77,11 @@ export default function Home() {
 
       <main className={styles.main}>
         <header className={styles.header}>
-          <Logo />
+          <Link href="/">
+            <a>
+              <Logo />
+            </a>
+          </Link>
           <div />
         </header>
 
@@ -63,6 +105,81 @@ export default function Home() {
               https://github.com/IntegraLedger/DragAndDropStarter
             </a>
           </div>
+        </div>
+
+        <div className={styles.uploadContainer}>
+          <form className={styles.uploadBox}>
+            <div
+              onDragEnter={(e) => {
+                e.preventDefault();
+                setIsDraggingFileOver(true);
+              }}
+              // 9% global support as of August 2021
+              onDragExit={(e) => {
+                setIsDraggingFileOver(false);
+                e.preventDefault();
+              }}
+              onDragLeave={(e) => {
+                setIsDraggingFileOver(false);
+                e.preventDefault();
+              }}
+              onDragOver={(e) => {
+                e.preventDefault();
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                setIsDraggingFileOver(false);
+                onSelectFile(e.dataTransfer.files);
+              }}
+            >
+              {
+                Object.keys(jsonResponse).length ? (
+                  <p style={{whiteSpace: 'pre'}}>
+                    {JSON.stringify(jsonResponse, null, 2)}
+                  </p>
+                ) : (
+                  <div
+                    className={styles.uploadContent}
+                  >
+                    <PdfIcon />
+                    <h2>
+                      Drag and drop PDF documents here  
+                    </h2>
+      
+                    <div className={styles.orSection}>
+                      <span className={styles.orLine} />
+                      <p> OR </p>
+                      <span className={styles.orLine} />
+                    </div>
+      
+                    <div className={styles.uploadSection}>
+                      <label
+                        htmlFor="fileUpload"
+                        className={`${styles.uploadButton} ${isUploading ? styles.uploadButtonDisabled : ''}`}
+                      >
+                        Browse pdf files from your computer
+                        <input
+                          multiple
+                          id="fileUpload"
+                          style={{
+                            display: 'none',
+                          }}
+                          required={true}
+                          className={styles.fileInput}
+                          type="file"
+                          name="fileUpload"
+                          accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,.txt,application/pdf,.pdf,text/html"
+                          onChange={(e) => {
+                            onSelectFile(e.target.files);
+                          }}
+                        />                
+                      </label>
+                    </div>
+                  </div>
+                )
+              }
+            </div>
+          </form>
         </div>
       </main>
     </div>
