@@ -17,7 +17,7 @@ const Logo = () => (
     <defs>
       <linearGradient id="paint0_linear" x1="4.69782" y1="29.3918" x2="27.4103" y2="6.67926" gradientUnits="userSpaceOnUse">
       <stop stopColor="#0056F5"/>
-      <stop offset="1" stop-color="#33CCF4"/>
+      <stop offset="1" stopColor="#33CCF4"/>
       </linearGradient>
       <clipPath id="clip0">
       <rect width="120" height="36" fill="white"/>
