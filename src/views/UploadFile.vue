@@ -44,6 +44,7 @@
             class="d-none"
             ref="fileInput"
             @change="onFileAdd"
+            multiple
           />
           <v-btn
             color="primary"
@@ -79,51 +80,46 @@ export default {
     openFileInput() {
       this.$refs.fileInput.$refs.input.click();
     },
-    onFileAdd(file) {
-      this.handleFile(file);
+    onFileAdd(files) {
+      this.handleFile(files);
     },
     addDocument(e) {
       let droppedFiles = e.dataTransfer.files;
       if (!droppedFiles) return;
-      this.handleFile(droppedFiles[0]);
+      this.handleFile(droppedFiles);
     },
 
-    async handleFile(file) {
+    async handleFile(files) {
       try {
-        if (!file.name.endsWith(".pdf")) {
-          this.isTypeError = true;
-          this.errorMessage = "Please upload only PDF file types.";
-          return;
+        let i = 1;
+        const allJsonResponses = {}
+        for (const file of files) {
+          const data = new FormData();
+          data.append('file', file, file.name)
+          const res = await fetch('https://integraapiproduction.azurewebsites.net/analyze/', {
+            method: 'POST',
+            body: data,
+          });
+          // const res = await this.$store.dispatch("document/loadData", {
+          //   data,
+          // });
+          const jsonResp = await res.json();
+          const resultKeys = Object.keys(jsonResp.result);
+          resultKeys.forEach((key) => {
+            try {
+              jsonResp.result[key] = JSON.parse(jsonResp.result[key])
+            } catch (e) {
+              // 
+            }
+          });
+          allJsonResponses[i.toString()] = jsonResp.result
+          // allJsonResponses[i.toString()] = res
+          i++
         }
-        const formData = new FormData();
-        formData.append("file", file);
-        const res = await this.$store.dispatch("document/loadData", {
-          formData,
-        });
-        let result = {};
-        for (const key in res.result.result) {
-          let val = res.result.result[key];
-          try {
-            val = JSON.parse(val);
-          } catch (error) {
-            //
-          }
-          result = {
-            ...result,
-            [key]: val,
-          };
-        }
-        if (res.succeed) {
-          this.$store.commit("document/updateDocument", file);
-          this.$store.commit("document/updateMeta", result || {});
-          setTimeout(() => {
-            this.$router.push("/jsonview");
-          }, 500);
-        } else {
-          this.isTypeError = true;
-          this.errorMessage = "Unknown Error Occured";
-          return;
-        }
+        this.$store.commit("document/updateMeta", allJsonResponses || {});
+        setTimeout(() => {
+          this.$router.push("/jsonview");
+        }, 500);
       } catch (error) {
         console.log(error);
         this.isTypeError = true;

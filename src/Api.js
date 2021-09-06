@@ -1,6 +1,6 @@
 import axios from "axios";
 const instance = axios.create({
-  baseURL: process.env.VUE_APP_BACKEND_API,
+  baseURL: 'https://integraapiproduction.azurewebsites.net',
   withCredentials: false,
   headers: {
     Accept: "application/json",
